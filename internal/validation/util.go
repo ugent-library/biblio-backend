@@ -42,3 +42,14 @@ func IsStatus(val string) bool {
 func IsDatasetAccessLevel(val string) bool {
 	return InArray(vocabularies.Map["access_levels"], val)
 }
+
+func ArrayUniq(values []string) []string {
+	uniqueValues := make([]string, 0, 10)
+	for _, v := range values {
+		if InArray(uniqueValues, v) {
+			continue
+		}
+		uniqueValues = append(uniqueValues, v)
+	}
+	return uniqueValues
+}

@@ -760,3 +760,20 @@ func (pl *PublicationLink) Validate() (errs validation.Errors) {
 	}
 	return
 }
+
+func (dep *PublicationDepartment) Clone() *PublicationDepartment {
+	c := &PublicationDepartment{
+		ID:   dep.ID,
+		Tree: make([]PublicationDepartmentRef, 0, len(dep.Tree)),
+	}
+	for _, ref := range dep.Tree {
+		c.Tree = append(c.Tree, ref.Clone())
+	}
+	return c
+}
+
+func (depRef *PublicationDepartmentRef) Clone() PublicationDepartmentRef {
+	return PublicationDepartmentRef{
+		ID: depRef.ID,
+	}
+}
