@@ -3,10 +3,14 @@ package biblio
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/ugent-library/biblio-backend/internal/models"
 )
 
 type requestPayload struct {
@@ -60,7 +64,16 @@ func (c *Client) doRequest(req *http.Request, responseData interface{}) (*http.R
 	if err != nil {
 		return res, err
 	}
-	defer res.Body.Close()
+	defer func() {
+		io.Copy(ioutil.Discard, res.Body)
+		res.Body.Close()
+	}()
+
+	if res.StatusCode == http.StatusNotFound {
+		return res, models.HttpNotFound{
+			Message: fmt.Sprintf("url %s not found", req.URL.String()),
+		}
+	}
 
 	var p responsePayload
 	if err = json.NewDecoder(res.Body).Decode(&p); err != nil {

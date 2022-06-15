@@ -26,11 +26,12 @@ type Services struct {
 	ProjectSearchService
 	LicenseSearchService
 	MediaTypeSearchService
-	PublicationSources  map[string]PublicationGetter
-	DatasetSources      map[string]DatasetGetter
-	PublicationEncoders map[string]PublicationEncoder
-	PublicationDecoders map[string]PublicationDecoderFactory
-	Tasks               *tasks.Hub
+	PublicationSources   map[string]PublicationGetter
+	DatasetSources       map[string]DatasetGetter
+	PublicationEncoders  map[string]PublicationEncoder
+	PublicationDecoders  map[string]PublicationDecoderFactory
+	Tasks                *tasks.Hub
+	RelatedObjectService RelatedObjectService
 }
 
 type PublicationEncoder func(*models.Publication) ([]byte, error)
@@ -128,4 +129,20 @@ type LicenseSearchService interface {
 
 type MediaTypeSearchService interface {
 	SuggestMediaTypes(string) ([]models.Completion, error)
+}
+
+type RelatedObjectSource interface {
+	PersonService
+	OrganizationService
+	ProjectService
+}
+
+type RelatedObjectService interface {
+	Get(t string, id string) (*models.RelatedObject, error)
+	GetMultiple(t string, ids []string) ([]*models.RelatedObject, error)
+	Sync(*models.RelatedObject) error
+	Save(*models.RelatedObject) error
+	SyncAndSave(*models.RelatedObject) error
+	Each(func(*models.RelatedObject)) error
+	SyncAndSaveAll() error
 }

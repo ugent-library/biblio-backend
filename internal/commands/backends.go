@@ -23,6 +23,7 @@ import (
 	"github.com/ugent-library/biblio-backend/internal/backends/ris"
 	"github.com/ugent-library/biblio-backend/internal/backends/spdxlicenses"
 	"github.com/ugent-library/biblio-backend/internal/backends/store"
+	"github.com/ugent-library/biblio-backend/internal/related_object_store"
 	"github.com/ugent-library/biblio-backend/internal/tasks"
 	"github.com/ugent-library/go-orcid/orcid"
 )
@@ -93,7 +94,8 @@ func newServices() *backends.Services {
 			"wos":    ris.NewDecoder,
 			"bibtex": bibtex.NewDecoder,
 		},
-		Tasks: tasks.NewHub(),
+		Tasks:                tasks.NewHub(),
+		RelatedObjectService: newRelatedObjectService(biblioClient),
 	}
 }
 
@@ -111,6 +113,17 @@ func newFileStore() *filestore.Store {
 		log.Fatalln("Unable to initialize filestore", err)
 	}
 	return fs
+}
+
+func newRelatedObjectService(src backends.RelatedObjectSource) backends.RelatedObjectService {
+	s, err := related_object_store.New(
+		viper.GetString("pg-conn"),
+		src,
+	)
+	if err != nil {
+		log.Fatalln("Unable to initialize related object store", err)
+	}
+	return s
 }
 
 func newEs6Client(t string) *es6.Client {
